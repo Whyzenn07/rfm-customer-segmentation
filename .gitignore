@@ -1,0 +1,9 @@
+data/raw/*
+!data/raw/README.md
+data/processed/*
+!data/processed/.gitkeep
+notebooks/reference/
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+.claude/
