@@ -1,5 +1,6 @@
 # Customer Segmentation with RFM Analysis
 
+![Rebuild Notebooks](https://github.com/Whyzenn07/rfm-customer-segmentation/actions/workflows/rebuild-notebooks.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![pandas](https://img.shields.io/badge/pandas-2.0%2B-150458?logo=pandas&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3%2B-F7931E?logo=scikit-learn&logoColor=white)
@@ -211,6 +212,11 @@ Each `.py` script has a matching **executed `.ipynb`** counterpart (e.g.
 [`02_rfm_segmentation.ipynb`](notebooks/02_rfm_segmentation.ipynb)) with
 every table and chart already embedded — open it directly on GitHub to see
 the full run without installing anything.
+
+**Kept in sync automatically:** [`.github/workflows/rebuild-notebooks.yml`](.github/workflows/rebuild-notebooks.yml)
+re-downloads the dataset, re-runs all three notebooks, and commits the
+refreshed `.ipynb`/chart outputs every time a script under `notebooks/*.py`
+changes — so the notebooks on GitHub never go stale relative to the code.
 
 ## Key Learnings & Limitations
 
