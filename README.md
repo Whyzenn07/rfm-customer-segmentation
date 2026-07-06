@@ -179,8 +179,11 @@ RFM Analysis/
 │   └── processed/                # cleaned transactions + rfm_segments.csv
 ├── notebooks/
 │   ├── 01_data_cleaning.py       # cell-marked (# %%) — open in VS Code/Jupyter
+│   ├── 01_data_cleaning.ipynb    # executed, outputs embedded
 │   ├── 02_rfm_segmentation.py
-│   └── 03_kmeans_clustering.py   # bonus: unsupervised validation
+│   ├── 02_rfm_segmentation.ipynb
+│   ├── 03_kmeans_clustering.py   # bonus: unsupervised validation
+│   └── 03_kmeans_clustering.ipynb
 ├── outputs/                       # generated charts
 ├── reports/
 │   └── business_recommendations.md
@@ -203,6 +206,11 @@ python 01_data_cleaning.py
 python 02_rfm_segmentation.py
 python 03_kmeans_clustering.py   # optional bonus
 ```
+
+Each `.py` script has a matching **executed `.ipynb`** counterpart (e.g.
+[`02_rfm_segmentation.ipynb`](notebooks/02_rfm_segmentation.ipynb)) with
+every table and chart already embedded — open it directly on GitHub to see
+the full run without installing anything.
 
 ## Key Learnings & Limitations
 
