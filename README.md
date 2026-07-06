@@ -1,5 +1,10 @@
 # Customer Segmentation with RFM Analysis
 
+![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
+![pandas](https://img.shields.io/badge/pandas-2.0%2B-150458?logo=pandas&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3%2B-F7931E?logo=scikit-learn&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-1BAF7A)
+
 Segmenting 4,334 e-commerce customers into 10 actionable groups using
 Recency, Frequency, and Monetary analysis — and turning that into three
 quantified recommendations a retention/marketing team could act on this
@@ -15,6 +20,7 @@ project — see [Result](#result).
 - [Task](#task)
 - [Action](#action)
 - [Result](#result)
+- [Bonus: Unsupervised Validation (K-Means)](#bonus-unsupervised-validation-k-means)
 - [Repository Structure](#repository-structure)
 - [How to Run](#how-to-run)
 - [Key Learnings & Limitations](#key-learnings--limitations)
@@ -49,7 +55,8 @@ Monetary) analysis that:
 ## Action
 
 **Tech stack:** Python (pandas, NumPy), Matplotlib/Seaborn for
-visualization. See [`requirements.txt`](requirements.txt).
+visualization, scikit-learn for the K-Means bonus. See
+[`requirements.txt`](requirements.txt).
 
 ### 1. Data Cleaning — [`notebooks/01_data_cleaning.py`](notebooks/01_data_cleaning.py)
 
@@ -85,10 +92,17 @@ Recency and Frequency scores are combined into the standard industry 5x5
 RFM segment grid (10 named segments: Champions, Loyal Customers, Potential
 Loyalists, New Customers, Promising, Need Attention, About to Sleep, At
 Risk, Can't Lose Them, Hibernating) — chosen over an unsupervised approach
-(e.g. K-Means) specifically because named segments are directly actionable
-by a marketing team without a data scientist translating cluster IDs.
+as the primary method specifically because named segments are directly
+actionable by a marketing team without a data scientist translating
+cluster IDs. K-Means is used afterward as an independent sanity check —
+see [Bonus](#bonus-unsupervised-validation-k-means).
 
 ## Result
+
+Sample output — the segment summary table produced by
+[`02_rfm_segmentation.py`](notebooks/02_rfm_segmentation.py):
+
+![Sample output: segment summary table](outputs/segment_summary_table.png)
 
 ![Customer share vs. revenue share by segment](outputs/segment_customers_vs_revenue.png)
 
@@ -123,16 +137,50 @@ Full write-up with quantified opportunity sizing:
 averages, not measured campaign outcomes — the point is showing the
 reasoning, not overclaiming results from public historical data.)*
 
+## Bonus: Unsupervised Validation (K-Means)
+
+**Question:** does an unsupervised method discover roughly the same
+customer structure as the rule-based RFM segments above? See
+[`notebooks/03_kmeans_clustering.py`](notebooks/03_kmeans_clustering.py).
+
+Frequency and Monetary are log-transformed (heavily right-skewed) and
+standardized before clustering. K=3 was selected as optimal by maximizing
+the Silhouette score across K=2-8:
+
+![Elbow and Silhouette diagnostics](outputs/kmeans_optimal_k.png)
+![K-Means clusters in Recency x Monetary space](outputs/kmeans_clusters_scatter.png)
+
+| Cluster | Customers | Avg Recency | Avg Frequency | Avg Monetary | Dominant RFM Segment | Overlap |
+|---|---|---|---|---|---|---|
+| 0 | 986 | 255.0 | 1.4 | £405 | Hibernating | **78.1%** |
+| 1 | 1,328 | 30.2 | 9.7 | £5,361 | Loyal Customers | 44.7% |
+| 2 | 2,020 | 54.5 | 2.0 | £602 | Potential Loyalists | 22.7% |
+
+**Takeaway:** the two methods agree strongly at the extremes — Cluster 0
+overlaps 78.1% with "Hibernating," confirming that segment reflects a real,
+distinct behavioral group rather than an artifact of the scoring grid. The
+middle segments blend together under K=3 (a high-value cluster mixes
+Champions with Loyal Customers; a low-value cluster spans five different
+named segments) — which is expected, since 3 unsupervised clusters can't
+resolve the granularity that 10 rule-based segments were designed to
+capture. This is the actual argument for keeping the rule-based grid as the
+primary method: it recovers structure fine-grained enough to target
+specific interventions (e.g. distinguishing "Can't Lose Them" from generic
+"At Risk"), which K-Means at a business-interpretable K cannot.
+
 ## Repository Structure
 
 ```
 RFM Analysis/
+├── LICENSE
+├── README.md
 ├── data/
 │   ├── raw/                      # source data (gitignored except README)
 │   └── processed/                # cleaned transactions + rfm_segments.csv
 ├── notebooks/
 │   ├── 01_data_cleaning.py       # cell-marked (# %%) — open in VS Code/Jupyter
-│   └── 02_rfm_segmentation.py
+│   ├── 02_rfm_segmentation.py
+│   └── 03_kmeans_clustering.py   # bonus: unsupervised validation
 ├── outputs/                       # generated charts
 ├── reports/
 │   └── business_recommendations.md
@@ -146,13 +194,14 @@ pip install -r requirements.txt
 ```
 
 Place the dataset (see [`data/raw/README.md`](data/raw/README.md)) at
-`data/raw/data.csv`, then run the two notebooks in order — either as
+`data/raw/data.csv`, then run the notebooks in order — either as
 Jupyter/VS Code interactive cells (`# %%` markers) or as plain scripts:
 
 ```bash
 cd notebooks
 python 01_data_cleaning.py
 python 02_rfm_segmentation.py
+python 03_kmeans_clustering.py   # optional bonus
 ```
 
 ## Key Learnings & Limitations
@@ -169,11 +218,14 @@ python 02_rfm_segmentation.py
 
 ## Future Improvements
 
-- **K-Means clustering** on scaled RFM (+ behavioral/product-diversity)
-  features as an unsupervised alternative, benchmarked against the
-  rule-based segments here (see [`scikit-learn`](https://scikit-learn.org/)
-  in `requirements.txt`, reserved for this).
+- **Richer clustering features:** extend the K-Means bonus with behavioral
+  (product diversity, cancellation rate) and geographic features, which may
+  resolve the blended middle clusters seen at K=3.
 - **Cohort/migration analysis:** track how customers move between segments
   month over month to measure whether interventions actually work.
 - **A/B test the recommendations:** validate the estimated revenue impact
   in [Result](#result) against a real holdout group before rolling out.
+
+## License
+
+[MIT](LICENSE)
